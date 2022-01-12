@@ -1,0 +1,100 @@
+---
+# tasks file for roledemo
+- name: Update all packages to their latest version
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+- name: Installing gnupg package
+  apt:
+    pkg:
+    - gnupg
+- name: Add mongoDB GPG key
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-4.4.asc
+  when: ansible_facts['distribution_major_version'] == "18"
+
+- name: get apt repo key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: '{{ pritunl_apt_key_for_ubuntu18 }}'
+  when: ansible_facts['distribution_major_version'] == "18"
+
+- name: get apt repo key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: '{{ pritunl_apt_key_for_ubuntu20 }}'
+  when: ansible_facts['distribution_major_version'] == "20"
+
+- name: Add pritunl APT repository
+  apt_repository:
+    repo: '{{ pritunl_repository_for_ubuntu18 }}'
+  when: ansible_facts['distribution_major_version'] == "18"
+
+- name: Add pritunl APT repository
+  apt_repository:
+    repo: '{{ pritunl_repository_for_ubuntu20 }}'
+  when: ansible_facts['distribution_major_version'] == "20"
+
+- name: Add MONGODB repository on UBUNTU18
+  apt_repository:
+    repo: '{{ mongodb_repository_for_ubuntu18 }}'
+  when: ansible_facts['distribution_major_version'] == "18"
+
+- name: Add MONGODB repository on UBUNTU20
+  apt_repository:
+    repo: '{{ mongodb_repository_for_ubuntu20 }}'
+  when: ansible_facts['distribution_major_version'] == "20"
+
+- name: Update all packages to their latest version
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Install mongo & pritunl packages
+  apt:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - mongodb-org
+    - pritunl
+
+- name: Start and enable service
+  service:
+    name: '{{ item }}'
+    state: started
+    enabled: yes
+  with_items:
+    - mongod
+    - pritunl
+
+- name: Change value in /etc/security/limits.conf
+  lineinfile:
+    path: /etc/security/limits.conf
+    regexp: "{{ item.search }}"
+    line: "{{ item.change }}"
+    state: present
+  with_items:
+    - { search: '\* hard nofile', change: '* hard nofile 64000' }
+    - { search: '\* soft nofile', change: '* soft nofile 64000' }
+    - { search: 'root hard nofile', change: 'root hard nofile 64000' }
+    - { search: 'root soft nofile', change: 'root soft nofile 64000' }
+
+- name: Get setup key
+  command: 'pritunl setup-key'
+  register: pritunl_setup_key
+
+- name: Below are the pritunl_setup_key 
+  debug:
+    var: pritunl_setup_key.stdout_lines[0]
+
+- name: Wait for 1 min
+  wait_for:
+    timeout: 300
+
+- name: Get default username and password
+  command: 'pritunl default-password'
+  register: pritunl_default_password
+
+- name: Below are the pritunl default username and password
+  debug:
+    var: pritunl_default_password.stdout_lines

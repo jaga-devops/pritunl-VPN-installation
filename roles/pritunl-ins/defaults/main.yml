@@ -1,0 +1,8 @@
+---
+# defaults file for pritunl
+pritunl_repository_for_ubuntu18: deb https://repo.pritunl.com/stable/apt bionic main
+pritunl_repository_for_ubuntu20: deb https://repo.pritunl.com/stable/apt focal main
+pritunl_apt_key_for_ubuntu18: 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+pritunl_apt_key_for_ubuntu20: 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+mongodb_repository_for_ubuntu18: deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse
+mongodb_repository_for_ubuntu20: deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse
