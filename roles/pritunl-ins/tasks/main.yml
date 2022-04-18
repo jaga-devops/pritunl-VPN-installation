@@ -88,7 +88,7 @@
 
 - name: Wait for 1 min
   wait_for:
-    timeout: 300
+    timeout: 60
 
 - name: Get default username and password
   command: 'pritunl default-password'
